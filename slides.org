@@ -1,0 +1,290 @@
+#+TITLE:     C Basics
+#+AUTHOR: Will
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:2 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t title:nil
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:nil mouse:underline buttons:0 path:https://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+#+STARTUP: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger,table,x11names,dvipsnames]
+# #+LaTeX_CLASS_OPTIONS: [handout,notes,a4paper]
+# #+LATEX_HEADER: \usepackage{pgfpages}
+# #+LATEX_HEADER: \pgfpagesuselayout{2 on 1}[]
+
+#+BEAMER_THEME: Berkeley
+#+LATEX_HEADER: \usecolortheme{whale}
+
+#+LATEX_HEADER: \usefonttheme{professionalfonts}
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmonofont{Source Code Pro}
+#+LATEX_HEADER: \usepackage[scaled]{berasans}
+#+LATEX_HEADER:  \renewcommand{\familydefault}{\sfdefault}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+# #+LATEX_HEADER: \setmonofont{SourceCodePro-Regular}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \setbeamertemplate{itemize items}[circle]
+#+LATEX_HEADER: \usepackage[default,osfigures,scale=0.95]{opensans}
+
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{colortbl}
+# #+LATEX_HEADER: \rowcolors{1}{white}{Wheat1}
+# #+LATEX_HEADER: \usepackage{handoutWithNotes}
+# #+LATEX_HEADER: \mode<notes>{\setbeameroption{show notes} \pgfpagesuselayout{2 on 1}[a4paper,portrait,border shrink=5mm]}
+
+#+BEAMER_FRAME_LEVEL: 2
+
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+
+
+* Intro
+** The C Programming Language
+C is
+- Compiled
+- Static Typed
+- Low Level
+- Sequential
+- Everywhere
+- Safe
+- Evolving
+* History
+** History
+- Developed in early '70s by Denis Ritchie at Bell Labs
+- Ultimately used to redevelop UNIX kernel
+- K&R C book release in 1978
+- ANSI C released 1989 (C89)
+* Compiled
+** Hello, World
+- Given the following code:
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+NAME: one
+  #+begin_src C :exports code
+    #include <stdio.h>
+    #include <stdlib.h>
+  
+    int main(void) {
+        if (puts("Hello, World!\n") != EOF) {
+            return EXIT_SUCCESS;
+        }
+        return EXIT_FAILURE;
+    }
+  #+end_src
+- The code can be compiled into executable format:
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src shell
+    make hello-world
+  #+end_src
+- The executable has the following output:
+  #+CALL: one() :results verbatim :wrap example :export results
+* Static Typed
+** Integers
+- C has a bunch of standard integer types
+- They map to data understood at a hardware level
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C :exports code
+    #include <stdint.h>
+    int foo = 1;
+    unsigned int bar = 2;
+    long baz = 3;
+    long long qux = 4;
+    int16_t quux = 5;
+    int64_t waldo = 6;
+    int16_t corge = 0xFFFFFFFF;
+  #+end_src
+** Floats
+- C also defines some *binary* floating point types
+- The use of IEEE754 as an in memory format has been the source of
+  billions of dollars of mistakes
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C :exports code
+    float one_point_five = 1.5;
+    float point_three = 0.3;
+
+    double one_e_123 = 1e123;
+  #+end_src
+** Pointers and Strings
+- A pointer is a value that describes where data can be found in
+  memory
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C :exports code
+    int int_value = 123;
+    int *int_pointer = &int_value;
+  #+end_src
+- The use of a null terminator in c-strings has been the source of
+  trillions of dollars of mistakes
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C :exports code
+    char* string = "Hello, World!";
+  #+end_src
+** Custom Types
+- C supports structs and unions
+- Typedefs can be used to create aliases
+- Data packed manually into memory
+  #+begin_example
+    0                   1                   2                   3
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |     Code      |  Identifier   |            Length             |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |                         Authenticator                         |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |  Attributes ...
+       +-+-+-+-+-+-+-+-+-+-+-+-+-
+  #+end_example
+  (RADIUS protocol)
+* Low Level
+** Allocation
+- In C, the stack and heap are first class concepts
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+NAME: one
+  #+begin_src C :exports code
+    int value_on_the_stack = 42;
+
+    int *value_on_the_heap = (int*)malloc(1 * sizeof(int));
+    ,*value_on_the_heap = 42;
+  #+end_src
+** The Stack And Heap
+- The stack:
+  - Fast efficient linear memory allocation
+  - Very explicit lifetime bounds
+- The heap:
+  - Slightly less efficient (but still fast) memory allocation
+  - Manual lifetime management
+** Addition
+- Given the following function:
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+NAME: one
+  #+begin_src C :exports code
+    int add(int l, int r) {
+        return l + r;
+    }
+  #+end_src
+- Compiled like this:
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src shell
+    clang -O3 -c add.c
+  #+end_src
+- The machine code generated is "optimal":
+  #+begin_example
+    $ otool -vax add.o
+    add.o:
+    (__TEXT,__text) section
+    _add:
+    0000000000000000        add     w0, w1, w0
+    0000000000000004        ret
+  #+end_example
+** Vector maths
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src c
+    #include <stdio.h>
+    #include <arm_neon.h>
+
+    int main(){
+        uint8x16_t v1, v2;
+        for (int idx = 0; idx < 15; ++idx) {
+            v1[idx] = 2 * (v2[idx] = idx);
+        }
+        uint8x16_t res = v1 * v2;
+        char *sep = "";
+        for (int idx = 0; idx < 15; ++idx) {
+            printf("%s%d", sep, res[idx]);
+            sep = ", ";
+        }
+        printf("\n");
+    }
+ #+end_src
+* Sequential
+** Function invocation
+- Nothing too surprising, this code
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+NAME: two
+  #+begin_src C :exports code
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int foo(int in) {
+        return in * 2;
+    }
+
+    int bar(int in) {
+        return in * 3;
+    }
+
+    int main(void) {
+        if (printf("%d", foo(bar(5))) != EOF) {
+            return EXIT_SUCCESS;
+        }
+        return EXIT_FAILURE;
+    }
+  #+end_src
+- ... prints this
+  #+CALL: two() :results verbatim :wrap example :export results
+  #+RESULTS:
+  #+begin_example
+  30
+  #+end_example
+** State
+- Local to function
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C
+    int foo() {
+        int state = 1;
+        ...
+    }
+ #+end_src
+- Local to module
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C
+        static int state = 1;
+        int foo() {
+        ...
+    }
+ #+end_src
+- Global
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C
+        int state = 1;
+        int foo() {
+        ...
+    }
+ #+end_src
+- Shared across processes
+  #+ATTR_LaTeX: :float nil :options fontsize=\tiny,frame=lines,commentstyle=\bfseries 
+  #+begin_src C
+    int foo() {
+        shmget(...);
+        ...
+    }
+ #+end_src
+** Quirks
+- Instruction Reordering
+- Signal handling
+- Jumps (goto considered harmful)
+* Everywhere
+** Everywhere-ish
+- Linux (~24million SLOC)
+- PostgreSQL (~2 million SLOC)
+- Python
+- unixODBC
+- Sqlite3
+- ...
+* Safe
+** Safe
+- Overflow
+- Buffer Overrun
+- Thread safety
+- Aliasing
+- Signal handling
+- Memory Leaks
+- Memory Ownership
+* Evolving
+** Evolving
+- C99
+- C11
+- C17
